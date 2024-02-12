@@ -27,7 +27,7 @@ project("lab_1")
 # used in the AndroidManifest.xml file.
 add_library(${CMAKE_PROJECT_NAME} SHARED
     # List C/C++ source files with relative paths to this CMakeLists.txt.
-    lab_1.cpp obj_file_parser_external.cpp model/camera/camera.cpp model/engine/engine.cpp model/geometry/geometry.cpp)
+    lab_1.cpp obj_file_parser_external.cpp model/camera/camera.cpp model/engine/engine.cpp model/geometry/geometry.cpp drawer.cpp)
 
 
 # Specifies libraries CMake should link to your target library. You

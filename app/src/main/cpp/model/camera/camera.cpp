@@ -7,6 +7,7 @@
 bool Camera::updateRadius(float offsetR)
 {
     float newCameraR = cameraR + offsetR;
+    cameraR = newCameraR;
     if (newCameraR > minScaleSize && newCameraR < maxScaleSize) {
         cameraR = newCameraR;
         return true;
