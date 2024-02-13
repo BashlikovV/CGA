@@ -159,21 +159,71 @@ jobject drawer::getDefaultPaint(JNIEnv *env) {
     return (*env).NewObject(paintClass, constructor);
 }
 
+
+void drawer::drawPoint(JNIEnv *env, jobject bitmap, float x, float y, jobject paint) {
+    jclass nativeCanvasClass = (*env).FindClass("android/graphics/Bitmap");
+    jmethodID drawLineId = (*env).GetMethodID(
+            nativeCanvasClass, "setPixel", "(III)V"
+    );
+
+    (*env).CallVoidMethod(bitmap, drawLineId, (int)x, (int)y, paint);
+}
+
 void drawer::drawLine(
         JNIEnv *env,
-        jobject nativeCanvas,
         float startX,
         float startY,
         float stopX,
         float stopY,
         jobject paint
 ) {
+    (*env).CallVoidMethod(nativeCanvas, drawLineMethodId, startX, startY, stopX, stopY, paint);
+//    bool steep = false;
+//    if (std::abs(startX - stopX) < std::abs(startY - stopY)) {
+//        std::swap(startX, startY);
+//        std::swap(stopX, stopY);
+//        steep = true;
+//    }
+//    if (startX > stopX) {
+//        std::swap(startX, stopX);
+//        std::swap(startY, stopY);
+//    }
+//    int dx = stopX - startX;
+//    int dy = stopY - startY;
+//    float derror = std::abs(dy / float(dx));
+//    float error = 0;
+//    int y = startY;
+//    for (int x = startX; x <= stopX; x++) {
+//        if (steep) {
+//            drawPoint(env, bitmap, y, x, paint);
+////            setPixel(y, x, color);
+//        }
+//        else {
+//            drawPoint(env, bitmap, x, y, paint);
+////            setPixel(x, y, color);
+//        }
+//        error += derror;
+//
+//        if (error > .5) {
+//            y += (stopY > startY ? 1 : -1);
+//            error -= 1.;
+//        }
+//    }
+}
+
+void drawer::drawText(
+        JNIEnv *env,
+        string text,
+        float x,
+        float y,
+        jobject paint
+) {
     jclass nativeCanvasClass = (*env).FindClass("android/graphics/Canvas");
     jmethodID drawLineId = (*env).GetMethodID(
-            nativeCanvasClass, "drawLine", "(FFFFLandroid/graphics/Paint;)V"
+        nativeCanvasClass, "drawText", "(Ljava/lang/String;FFLandroid/graphics/Paint;)V"
     );
 
-    (*env).CallVoidMethod(nativeCanvas, drawLineId, startX, startY, stopX, stopY, paint);
+    (*env).CallVoidMethod(nativeCanvas,drawLineId, env->NewStringUTF(text.c_str()), x, y, paint);
 }
 
 int drawer::getNewColor(int color, float koef) {
@@ -205,19 +255,19 @@ void drawer::invalidateView(JNIEnv *env, jobject view) {
     (*env).CallVoidMethod(view, mid);
 }
 
-void drawer::painObject(JNIEnv *env, jobject thiz, jobject canvas) {
+void drawer::painObject(JNIEnv *env, jobject thiz) {
     light = light.normalize();
     paint = getDefaultPaint(env);
 
     clock_t beginFrame = clock();
 
-    for (size_t i = 0; i < height; i++) {
-        for (size_t j = 0; j < width; j++) {
-            int ind = i * width + j;
-            buffer[ind] = 255;
-            zbuffer[ind] = -100000;
-        }
-    }
+//    for (size_t i = 0; i < height; i++) {
+//        for (size_t j = 0; j < width; j++) {
+//            int ind = i * width + j;
+//            buffer[ind] = 255;
+//            zbuffer[ind] = -100000;
+//        }
+//    }
 
     viewport(width, height);
 
@@ -234,9 +284,9 @@ void drawer::painObject(JNIEnv *env, jobject thiz, jobject canvas) {
         for (size_t i = 0; i < size; i++) {
             face = faces[i];
 
-            if ((face.normal * camera.getFront()) + 1.0f < 0) {
-                continue;
-            }
+//            if ((face.normal * camera.getFront()) + 1.0f < 0) {
+//                continue;
+//            }
 
             for (size_t j = 0; j < 3; j++) {
                 drawFace[j] = finalMatrix * *face.points[j].vertex;
@@ -246,7 +296,7 @@ void drawer::painObject(JNIEnv *env, jobject thiz, jobject canvas) {
             for (int j = 0; j < 3; j++) {
                 Vec3i a1 = drawFace[j];
                 Vec3i a2 = drawFace[(j + 1) % 3];
-                drawLine(env, canvas, a1[0], a1[1], a2[0], a2[1], paint);
+                drawLine(env, a1[0], a1[1], a2[0], a2[1], paint);
             }
         }
     }
@@ -419,13 +469,39 @@ Vec3f drawer::calculateNormal(Face face) {
 }
 
 void drawer::translateObject(float x, float y) {
+    float xoffset = x - lastX;
+    float yoffset = lastY - y;
+    lastX = x;
+    lastY = y;
 
+    float sensitivity = 0.0005f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    camera.cameraPhi += xoffset;
+    camera.cameraZeta += -yoffset;
+
+    rerender = true;
 }
 
 void drawer::scaleObject(float zoom) {
-    camera.updateRadius(zoom);
+    camera.updateRadius(zoom / 2400.0f);
+
+    rerender = true;
 }
 
 void drawer::rotateObject(float angle) {
 
+    rerender = true;
+}
+
+void drawer::setCanvas(jobject _nativeCanvas) {
+    nativeCanvas = _nativeCanvas;
+}
+
+void drawer::setDrawLineMethodId(JNIEnv *env) {
+    jclass nativeCanvasClass = (*env).FindClass("android/graphics/Canvas");
+    drawLineMethodId = (*env).GetMethodID(
+            nativeCanvasClass, "drawLine", "(FFFFLandroid/graphics/Paint;)V"
+    );
 }

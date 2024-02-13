@@ -58,24 +58,29 @@ private:
     jobject getCanvas(JNIEnv* env, jobject drawContext);
     jobject getNativeCanvas(JNIEnv* env, jobject canvas);
     jobject getDefaultPaint(JNIEnv* env);
-    void drawLine(JNIEnv* env,jobject nativeCanvas,float startX,float startY,float stopX,float stopY,jobject paint);
+    void drawPoint(JNIEnv *env, jobject nativeCanvas, float x, float y, jobject paint);
+    void drawLine(JNIEnv* env, float startX,float startY,float stopX,float stopY,jobject paint);
+    void drawText(JNIEnv *env, string text, float x, float y, jobject paint);
     int getNewColor(int color, float koef);
     int addColors(int a1, int a2);
     void invalidateView(JNIEnv* env, jobject view);
     Vec3f calculateNormal(Face face);
+    float lastX = 0, lastY = 0;
+    jmethodID drawLineMethodId;
 
 public:
     drawer(string pathToFile) {
         parseObjFile(pathToFile);
     }
-
+    jobject nativeCanvas = nullptr;
     vector<Face> parseObjFile(string filePath);
-    void painObject(JNIEnv *env,jobject thiz,jobject canvas);
+    void painObject(JNIEnv *env,jobject thiz);
     void translateObject(float x, float y);
     void scaleObject(float zoom);
     void rotateObject(float angle);
+    void setCanvas(jobject nativeCanvas);
+    void setDrawLineMethodId(JNIEnv* env);
 
 };
-
 
 #endif //LAB_1_DRAWER_H

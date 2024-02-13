@@ -3,7 +3,6 @@ package by.bashlikovvv.lab_1.presentation.view
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 
 class CanvasView : View {
@@ -13,13 +12,13 @@ class CanvasView : View {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
             : super(context, attrs, defStyleAttr)
 
-    override fun dispatchDraw(canvas: Canvas) {
-//        super.dispatchDraw(canvas)
-        onPaintCanvas(canvas)
+
+    init {
+        prepareEnvironment(getFilename())
     }
 
-    private fun invalidateView() {
-        invalidate()
+    override fun dispatchDraw(canvas: Canvas) {
+        onPaintCanvas(canvas)
     }
 
     private external fun onPaintCanvas(canvas: Canvas)

@@ -77,6 +77,7 @@ Java_by_bashlikovvv_lab_11_presentation_view_CanvasView_prepareEnvironment(
         jstring path_to_file
 ) {
     drawerObject.parseObjFile(env->GetStringUTFChars(path_to_file, 0));
+    drawerObject.setDrawLineMethodId(env);
 }
 
 extern "C"
@@ -86,5 +87,6 @@ Java_by_bashlikovvv_lab_11_presentation_view_CanvasView_onPaintCanvas(
         jobject thiz,
         jobject canvas
 ) {
-    drawerObject.painObject(env, thiz, canvas);
+    drawerObject.nativeCanvas = canvas;
+    drawerObject.painObject(env, thiz);
 }

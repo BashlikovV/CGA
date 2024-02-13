@@ -1,8 +1,6 @@
 package by.bashlikovvv.lab_1.presentation.ui
 
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,13 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.viewinterop.AndroidView
-import by.bashlikovvv.lab_1.R
 import by.bashlikovvv.lab_1.presentation.view.CanvasView
 import by.bashlikovvv.lab_1.ui.theme.Lab_1Theme
 import kotlin.concurrent.thread
@@ -83,7 +79,7 @@ fun ApplicationContent(
     onTranslate: (Offset) -> Unit
 ) {
     var scaleState by Delegates.observable(1f) { _, oldValue, newValue ->
-        if (oldValue != newValue) {
+        if (oldValue.roundToInt() != newValue.roundToInt()) {
             onScale(newValue)
         }
     }
